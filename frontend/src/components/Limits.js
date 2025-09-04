@@ -238,7 +238,7 @@ const Limits = () => {
                     {limit.fuel_type && (
                       <div className="flex items-center gap-2 text-sm">
                         <Fuel className="w-4 h-4 text-gray-500" />
-                        <span className="capitalize">{limit.fuel_type}</span>
+                        <span className="capitalize">{FUEL_NAMES[limit.fuel_type] || limit.fuel_type}</span>
                       </div>
                     )}
 
