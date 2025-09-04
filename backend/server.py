@@ -189,6 +189,171 @@ async def verify_code(cnpj: str, code: str) -> bool:
         return True
     return False
 
+# Credit and notification functions
+async def calculate_client_credit_usage(client_id: str) -> float:
+    """Calculate current credit usage from open invoices"""
+    open_invoices = await db.invoices.find({
+        "client_id": client_id,
+        "status": {"$in": ["open", "overdue"]}
+    }).to_list(None)
+    
+    return sum(invoice["total_amount"] for invoice in open_invoices)
+
+async def check_credit_alerts(client_id: str, client_data: dict):
+    """Check if client has reached credit limit thresholds and send alerts"""
+    credit_limit = client_data.get("credit_limit", 10000.0)
+    current_usage = await calculate_client_credit_usage(client_id)
+    
+    if credit_limit <= 0:
+        return
+    
+    percentage = (current_usage / credit_limit) * 100
+    
+    # Update client's current usage
+    await db.clients.update_one(
+        {"id": client_id},
+        {"$set": {"current_credit_usage": current_usage}}
+    )
+    
+    # Check alert thresholds
+    now = datetime.now(timezone.utc)
+    alerts_to_send = []
+    
+    # Check 70% threshold
+    if percentage >= 70 and percentage < 80:
+        last_alert = client_data.get("last_70_alert")
+        if not last_alert or (now - last_alert).days >= 1:
+            alerts_to_send.append("70")
+            await db.clients.update_one({"id": client_id}, {"$set": {"last_70_alert": now}})
+    
+    # Check 80% threshold
+    elif percentage >= 80 and percentage < 90:
+        last_alert = client_data.get("last_80_alert")
+        if not last_alert or (now - last_alert).days >= 1:
+            alerts_to_send.append("80")
+            await db.clients.update_one({"id": client_id}, {"$set": {"last_80_alert": now}})
+    
+    # Check 90% threshold
+    elif percentage >= 90 and percentage < 100:
+        last_alert = client_data.get("last_90_alert")
+        if not last_alert or (now - last_alert).days >= 1:
+            alerts_to_send.append("90")
+            await db.clients.update_one({"id": client_id}, {"$set": {"last_90_alert": now}})
+    
+    # Check 100% threshold
+    elif percentage >= 100:
+        last_alert = client_data.get("last_100_alert")
+        if not last_alert or (now - last_alert).hours >= 6:  # More frequent for 100%
+            alerts_to_send.append("100")
+            await db.clients.update_one({"id": client_id}, {"$set": {"last_100_alert": now}})
+    
+    # Send alerts
+    for alert_type in alerts_to_send:
+        await send_credit_alert(client_data, alert_type, percentage, current_usage, credit_limit)
+        
+        # Store alert in database
+        alert = CreditAlert(
+            client_id=client_id,
+            alert_type=alert_type,
+            current_usage=current_usage,
+            credit_limit=credit_limit,
+            percentage=percentage
+        )
+        await db.credit_alerts.insert_one(alert.dict())
+
+async def send_credit_alert(client_data: dict, alert_type: str, percentage: float, usage: float, limit: float):
+    """Send credit limit alert via email and/or WhatsApp"""
+    try:
+        message = f"""🔴 *ALERTA DE LIMITE DE CRÉDITO*
+
+Empresa: {client_data['company_name']}
+CNPJ: {client_data['cnpj']}
+
+⚠️ Você atingiu {alert_type}% do seu limite de crédito!
+
+💰 Limite: R$ {limit:,.2f}
+📊 Utilizado: R$ {usage:,.2f} ({percentage:.1f}%)
+💳 Disponível: R$ {limit - usage:,.2f}
+
+{'🚨 LIMITE EXCEDIDO! Entre em contato conosco.' if percentage >= 100 else '⚠️ Monitore seus gastos para evitar bloqueios.'}
+
+Portal do Cliente - Rede de Postos"""
+
+        # Send email if configured
+        if client_data.get("email_notifications", True):
+            email = client_data.get("notification_email") or client_data.get("email")
+            if email:
+                await send_email_code(email, f"ALERTA: {alert_type}% do limite de crédito atingido", message)
+        
+        # Send WhatsApp if configured  
+        if client_data.get("whatsapp_notifications", True):
+            phone = client_data.get("notification_whatsapp") or client_data.get("whatsapp") or client_data.get("phone")
+            if phone:
+                await send_whatsapp_code(phone, message)
+                
+    except Exception as e:
+        logger.error(f"Error sending credit alert: {e}")
+
+async def send_email_code(email: str, subject: str, message: str = None, code: str = None) -> bool:
+    """Send verification code or message via email"""
+    try:
+        if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
+            logger.warning("Email credentials not configured")
+            return False
+            
+        email_message = MIMEMultipart("alternative")
+        email_message["Subject"] = subject
+        email_message["From"] = EMAIL_ADDRESS
+        email_message["To"] = email
+
+        if code:
+            # Verification code email
+            html_content = f"""
+            <html>
+              <body>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #2563eb;">Portal do Cliente - Código de Verificação</h2>
+                  <p>Seu código de verificação é:</p>
+                  <div style="background-color: #f3f4f6; padding: 20px; text-align: center; margin: 20px 0;">
+                    <h1 style="color: #1f2937; font-size: 32px; margin: 0;">{code}</h1>
+                  </div>
+                  <p>Este código expira em 5 minutos.</p>
+                  <p style="color: #6b7280; font-size: 12px;">Se você não solicitou este código, ignore este email.</p>
+                </div>
+              </body>
+            </html>
+            """
+        else:
+            # Alert or message email
+            html_content = f"""
+            <html>
+              <body>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #dc2626;">Portal do Cliente - Alerta</h2>
+                  <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 20px; margin: 20px 0;">
+                    <pre style="white-space: pre-wrap; font-family: Arial, sans-serif;">{message}</pre>
+                  </div>
+                </div>
+              </body>
+            </html>
+            """
+        
+        part = MIMEText(html_content, "html")
+        email_message.attach(part)
+
+        await aiosmtplib.send(
+            email_message,
+            hostname=SMTP_SERVER,
+            port=SMTP_PORT,
+            start_tls=True,
+            username=EMAIL_ADDRESS,
+            password=EMAIL_PASSWORD,
+        )
+        return True
+    except Exception as e:
+        logger.error(f"Error sending email: {e}")
+        return False
+
 # Pydantic Models
 class Client(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
