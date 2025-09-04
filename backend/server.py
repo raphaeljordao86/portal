@@ -527,6 +527,19 @@ class FuelTransaction(BaseModel):
     transaction_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     status: str = "completed"  # "pending", "completed", "cancelled"
 
+class FuelLimit(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    vehicle_id: Optional[str] = None  # If None, applies to all vehicles
+    limit_type: str  # "daily", "weekly", "monthly"
+    fuel_type: Optional[str] = None  # If None, applies to all fuels
+    limit_value: float  # Amount in liters or currency
+    limit_unit: str  # "liters" or "currency"
+    current_usage: float = 0.0
+    reset_date: datetime
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class Invoice(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_id: str
