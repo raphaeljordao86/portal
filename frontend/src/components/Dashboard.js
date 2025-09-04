@@ -297,9 +297,7 @@ const Dashboard = () => {
                       style={{ backgroundColor: FUEL_COLORS[fuelType] || '#6B7280' }}
                     />
                     <span className="font-medium capitalize">
-                      {fuelType === 'diesel' ? 'Diesel' : 
-                       fuelType === 'gasoline' ? 'Gasolina' : 
-                       fuelType === 'ethanol' ? 'Etanol' : fuelType}
+                      {FUEL_NAMES[fuelType] || fuelType}
                     </span>
                   </div>
                   <div className="text-right">
