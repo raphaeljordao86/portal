@@ -68,8 +68,8 @@ const Limits = () => {
       const submitData = {
         ...formData,
         limit_value: parseFloat(formData.limit_value),
-        vehicle_id: formData.vehicle_id || null,
-        fuel_type: formData.fuel_type || null
+        vehicle_id: formData.vehicle_id === "all" ? null : formData.vehicle_id || null,
+        fuel_type: formData.fuel_type === "all" ? null : formData.fuel_type || null
       };
 
       if (editingLimit) {
