@@ -25,6 +25,13 @@ import axios from 'axios';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Tradução dos nomes dos combustíveis
+const FUEL_NAMES = {
+  diesel: 'Diesel S10',
+  gasoline: 'Gasolina Comum', 
+  ethanol: 'Etanol'
+};
+
 const Limits = () => {
   const [limits, setLimits] = useState([]);
   const [vehicles, setVehicles] = useState([]);
