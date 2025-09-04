@@ -6,7 +6,7 @@ import requests
 import json
 import time
 
-BASE_URL = "https://fuel-client-portal.preview.emergentagent.com/api"
+BASE_URL = "https://fuelcontrol-dash.preview.emergentagent.com/api"
 
 def test_2fa_flow():
     print("🔐 Testing 2FA Flow as specified in requirements")

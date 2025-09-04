@@ -9,7 +9,7 @@ def test_exact_requirements():
     print("🎯 COMPREHENSIVE TEST - EXACT REQUIREMENTS")
     print("=" * 60)
     
-    BASE_URL = "https://fuel-client-portal.preview.emergentagent.com/api"
+    BASE_URL = "https://fuelcontrol-dash.preview.emergentagent.com/api"
     
     print("1️⃣ TESTING LOGIN WITH SPECIFIED CREDENTIALS")
     print("   CNPJ: '12.345.678/9012-34'")
