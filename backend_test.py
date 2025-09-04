@@ -57,6 +57,16 @@ class FuelStationAPITester:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
 
+    def test_create_test_data(self):
+        """Create test data"""
+        success, response = self.run_test(
+            "Create Test Data",
+            "POST",
+            "create-test-data",
+            200
+        )
+        return success
+
     def get_test_token(self):
         """Get a test token by creating a temporary client without 2FA for testing"""
         # First try to create test data
