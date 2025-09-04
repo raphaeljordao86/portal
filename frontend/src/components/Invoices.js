@@ -27,6 +27,13 @@ import CreditAlerts from './CreditAlerts';
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Tradução dos nomes dos combustíveis
+const FUEL_NAMES = {
+  diesel: 'Diesel S10',
+  gasoline: 'Gasolina Comum',
+  ethanol: 'Etanol'
+};
+
 const Invoices = () => {
   const [allInvoices, setAllInvoices] = useState([]);
   const [openInvoices, setOpenInvoices] = useState([]);
