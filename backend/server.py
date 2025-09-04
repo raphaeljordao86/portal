@@ -200,6 +200,17 @@ class Client(BaseModel):
     password_hash: str
     is_active: bool = True
     two_factor_enabled: bool = False
+    # Credit limit and notifications
+    credit_limit: float = 10000.0  # Default credit limit
+    current_credit_usage: float = 0.0
+    notification_email: Optional[str] = None
+    notification_whatsapp: Optional[str] = None
+    email_notifications: bool = True
+    whatsapp_notifications: bool = True
+    last_70_alert: Optional[datetime] = None
+    last_80_alert: Optional[datetime] = None
+    last_90_alert: Optional[datetime] = None
+    last_100_alert: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ClientCreate(BaseModel):
