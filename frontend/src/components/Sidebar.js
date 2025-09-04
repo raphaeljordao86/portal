@@ -11,7 +11,8 @@ import {
   Fuel,
   X,
   Building,
-  BarChart3
+  BarChart3,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
@@ -25,6 +26,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     { name: 'Limites', href: '/limits', icon: AlertCircle },
     { name: 'Abastecimentos', href: '/transactions', icon: Fuel },
     { name: 'Faturas', href: '/invoices', icon: CreditCard },
+    { name: 'Configurações', href: '/settings', icon: SettingsIcon },
   ];
 
   const handleLogout = () => {
@@ -52,7 +54,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                 <Fuel className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -71,9 +73,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
 
           {/* User Info */}
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+          <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
                 <Building className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
@@ -96,7 +98,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 className={({ isActive }) =>
                   `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg'
+                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`
                 }
