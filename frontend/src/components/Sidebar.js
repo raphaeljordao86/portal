@@ -53,20 +53,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col items-center space-y-2 w-full">
               <img 
                 src="https://customer-assets.emergentagent.com/job_fuelcontrol-dash/artifacts/1q79ov19_logo%20montecarlo.PNG" 
                 alt="Monte Carlo"
-                className="w-10 h-10 object-contain"
+                className="w-20 h-16 object-contain"
               />
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900">Portal do Cliente</h1>
+              <div className="text-center">
+                <p className="text-xs text-gray-500">Portal do Cliente</p>
               </div>
             </div>
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden absolute top-4 right-4"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="w-5 h-5" />
