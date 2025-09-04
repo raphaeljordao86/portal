@@ -218,7 +218,7 @@ async def get_vehicles(current_user: dict = Depends(get_current_user)):
     vehicles = await db.vehicles.find({"client_id": current_user["id"], "is_active": True}).to_list(None)
     return [Vehicle(**vehicle) for vehicle in vehicles]
 
-@api_router.post("/vehicles", response_model=Vehicle)
+@api_router.post("/vehicles", response_model=Vehicle, status_code=201)
 async def create_vehicle(vehicle_data: VehicleCreate, current_user: dict = Depends(get_current_user)):
     # Check if license plate already exists for this client
     existing = await db.vehicles.find_one({
