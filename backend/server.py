@@ -974,22 +974,43 @@ async def get_credit_status(current_user: dict = Depends(get_current_user)):
     }
 
 # Dashboard Routes
-@api_router.get("/dashboard/stats")
-async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
+@api_router.post("/dashboard/stats")
+async def get_dashboard_stats(filter_data: DashboardFilter, current_user: dict = Depends(get_current_user)):
+    """Get dashboard statistics with time filters"""
+    # Calculate date range based on filter
+    now = datetime.now(timezone.utc)
+    
+    if filter_data.period == "daily":
+        start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = now
+    elif filter_data.period == "weekly":
+        start_date = now - timedelta(days=now.weekday())  # Start of week (Monday)
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = now
+    elif filter_data.period == "monthly":
+        start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_date = now
+    elif filter_data.period == "custom":
+        if not filter_data.start_date or not filter_data.end_date:
+            raise HTTPException(status_code=400, detail="Start and end dates required for custom period")
+        start_date = filter_data.start_date
+        end_date = filter_data.end_date
+    else:
+        # Default to monthly
+        start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_date = now
+    
     # Get basic stats
     vehicles_count = await db.vehicles.count_documents({"client_id": current_user["id"], "is_active": True})
     
-    # Current month transactions
-    now = datetime.now(timezone.utc)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    month_transactions = await db.fuel_transactions.find({
+    # Get transactions for the period
+    period_transactions = await db.fuel_transactions.find({
         "client_id": current_user["id"],
-        "transaction_date": {"$gte": month_start}
+        "transaction_date": {"$gte": start_date, "$lte": end_date}
     }).to_list(None)
     
-    total_month_amount = sum(t["total_amount"] for t in month_transactions)
-    total_month_liters = sum(t["liters"] for t in month_transactions)
+    total_period_amount = sum(t["total_amount"] for t in period_transactions)
+    total_period_liters = sum(t["liters"] for t in period_transactions)
     
     # Open invoices
     open_invoices = await db.invoices.find({
@@ -999,37 +1020,34 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
     
     total_open_amount = sum(inv["total_amount"] for inv in open_invoices)
     
-    # Fuel type breakdown for current month
+    # Fuel type breakdown for the period
     fuel_breakdown = {}
-    for transaction in month_transactions:
+    for transaction in period_transactions:
         fuel_type = transaction["fuel_type"]
         if fuel_type not in fuel_breakdown:
             fuel_breakdown[fuel_type] = {"liters": 0, "amount": 0}
         fuel_breakdown[fuel_type]["liters"] += transaction["liters"]
         fuel_breakdown[fuel_type]["amount"] += transaction["total_amount"]
     
-    # Convert recent transactions to serializable format
-    recent_transactions = []
-    if month_transactions:
-        for transaction in month_transactions[-10:]:
-            recent_transactions.append({
-                "id": transaction["id"],
-                "license_plate": transaction["license_plate"],
-                "fuel_type": transaction["fuel_type"],
-                "liters": transaction["liters"],
-                "total_amount": transaction["total_amount"],
-                "transaction_date": transaction["transaction_date"].isoformat() if isinstance(transaction["transaction_date"], datetime) else transaction["transaction_date"]
-            })
-    
     return {
+        "period": filter_data.period,
+        "start_date": start_date.isoformat(),
+        "end_date": end_date.isoformat(),
         "vehicles_count": vehicles_count,
-        "month_total_amount": total_month_amount,
-        "month_total_liters": total_month_liters,
+        "period_total_amount": total_period_amount,
+        "period_total_liters": total_period_liters,
         "open_invoices_count": len(open_invoices),
         "total_open_amount": total_open_amount,
         "fuel_breakdown": fuel_breakdown,
-        "recent_transactions": recent_transactions
+        "recent_transactions": period_transactions[-10:] if period_transactions else [],
+        "total_transactions": len(period_transactions)
     }
+
+@api_router.get("/dashboard/stats")
+async def get_dashboard_stats_get(current_user: dict = Depends(get_current_user)):
+    """Get dashboard statistics - default monthly view"""
+    filter_data = DashboardFilter(period="monthly")
+    return await get_dashboard_stats(filter_data, current_user)
 
 # Test data creation (remove in production)
 @api_router.post("/create-test-data")
