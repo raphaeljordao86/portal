@@ -14,10 +14,10 @@ const Header = ({ setSidebarOpen }) => {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden w-12 h-12"
             onClick={() => setSidebarOpen(true)}
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-7 h-7" />
           </Button>
           <div className="ml-4 lg:ml-0">
             <h1 className="text-2xl font-semibold text-gray-900">
@@ -45,7 +45,7 @@ const Header = ({ setSidebarOpen }) => {
 
           {/* User Info */}
           <div className="hidden sm:flex items-center space-x-3 pl-4 border-l border-gray-200">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
             </div>
             <div className="text-right">
