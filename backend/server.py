@@ -1052,7 +1052,7 @@ async def get_dashboard_stats(filter_data: DashboardFilter, current_user: dict =
         "open_invoices_count": len(open_invoices),
         "total_open_amount": total_open_amount,
         "fuel_breakdown": fuel_breakdown,
-        "recent_transactions": period_transactions[-10:] if period_transactions else [],
+        "recent_transactions": [FuelTransaction(**t).dict() for t in period_transactions[-10:]] if period_transactions else [],
         "total_transactions": len(period_transactions)
     }
 
