@@ -182,6 +182,28 @@ async def store_verification_code(cnpj: str, code: str, method: str):
     
     await db.verification_codes.insert_one(verification_data)
 
+async def get_primary_contact(client_data: dict, contact_type: str) -> Optional[str]:
+    """Get primary contact for client by type (email or whatsapp)"""
+    contacts = client_data.get("contacts", [])
+    
+    # First try to find primary contact of the type
+    for contact in contacts:
+        if contact["type"] == contact_type and contact.get("is_primary", False):
+            return contact["value"]
+    
+    # If no primary found, return first contact of the type
+    for contact in contacts:
+        if contact["type"] == contact_type:
+            return contact["value"]
+    
+    # Fallback to main fields
+    if contact_type == "email":
+        return client_data.get("email")
+    elif contact_type == "whatsapp":
+        return client_data.get("phone")
+    
+    return None
+
 async def verify_code(cnpj: str, code: str) -> bool:
     """Verify the provided code against stored code"""
     stored_code = await db.verification_codes.find_one({
