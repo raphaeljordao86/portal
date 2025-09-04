@@ -243,8 +243,8 @@ const Transactions = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os combustíveis</SelectItem>
-                  <SelectItem value="diesel">Diesel</SelectItem>
-                  <SelectItem value="gasoline">Gasolina</SelectItem>
+                  <SelectItem value="diesel">Diesel S10</SelectItem>
+                  <SelectItem value="gasoline">Gasolina Comum</SelectItem>
                   <SelectItem value="ethanol">Etanol</SelectItem>
                 </SelectContent>
               </Select>
