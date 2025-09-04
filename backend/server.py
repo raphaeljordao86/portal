@@ -910,14 +910,20 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
 # Test data creation (remove in production)
 @api_router.post("/create-test-data")
 async def create_test_data():
-    # Create test client
+    # Create test client with credit limit
     test_client = Client(
         cnpj="12345678901234",
         company_name="Transportadora ABC Ltda",
         email="admin@transportadoraabc.com",
         phone="11999999999",
-        whatsapp="11999999999",
-        password_hash=get_password_hash("123456")
+        whatsapp="5511999999999",
+        password_hash=get_password_hash("123456"),
+        credit_limit=15000.0,
+        current_credit_usage=0.0,
+        notification_email="admin@transportadoraabc.com",
+        notification_whatsapp="5511999999999",
+        email_notifications=True,
+        whatsapp_notifications=True
     )
     
     await db.clients.insert_one(test_client.dict())
@@ -947,6 +953,7 @@ async def create_test_data():
     
     # Create test transactions
     import random
+    transaction_ids = []
     for i in range(20):
         transaction = FuelTransaction(
             client_id=test_client.id,
@@ -962,17 +969,38 @@ async def create_test_data():
         )
         transaction.total_amount = transaction.liters * transaction.price_per_liter
         await db.fuel_transactions.insert_one(transaction.dict())
+        transaction_ids.append(transaction.id)
     
-    # Create test invoice
-    invoice = Invoice(
+    # Create test invoices
+    invoice1 = Invoice(
         client_id=test_client.id,
         invoice_number="INV-2024-001",
         total_amount=2850.75,
-        due_date=datetime.now(timezone.utc) + timedelta(days=15)
+        due_date=datetime.now(timezone.utc) + timedelta(days=15),
+        transactions=transaction_ids[:10]
     )
-    await db.invoices.insert_one(invoice.dict())
+    await db.invoices.insert_one(invoice1.dict())
     
-    return {"message": "Test data created successfully"}
+    invoice2 = Invoice(
+        client_id=test_client.id,
+        invoice_number="INV-2024-002",
+        total_amount=4200.50,
+        due_date=datetime.now(timezone.utc) + timedelta(days=5),
+        transactions=transaction_ids[10:]
+    )
+    await db.invoices.insert_one(invoice2.dict())
+    
+    # Create test credit alert (90% usage)
+    alert = CreditAlert(
+        client_id=test_client.id,
+        alert_type="90",
+        current_usage=13500.0,
+        credit_limit=15000.0,
+        percentage=90.0
+    )
+    await db.credit_alerts.insert_one(alert.dict())
+    
+    return {"message": "Test data created successfully with credit system"}
 
 # Include the router in the main app
 app.include_router(api_router)
