@@ -50,8 +50,14 @@ const Limits = () => {
         axios.get(`${API}/limits`),
         axios.get(`${API}/vehicles`)
       ]);
+      
+      // Remove duplicates from vehicles array based on id
+      const uniqueVehicles = vehiclesResponse.data.filter((vehicle, index, self) => 
+        index === self.findIndex(v => v.id === vehicle.id)
+      );
+      
       setLimits(limitsResponse.data);
-      setVehicles(vehiclesResponse.data);
+      setVehicles(uniqueVehicles);
     } catch (error) {
       toast.error('Erro ao carregar dados');
       console.error('Error fetching data:', error);
