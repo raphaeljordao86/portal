@@ -180,20 +180,21 @@ class FuelStationAPITester:
             return True  # This is expected behavior
 
     def test_2fa_request_whatsapp(self):
-        """Test requesting 2FA code via WhatsApp"""
+        """Test requesting 2FA code via WhatsApp - UPDATED FOR FIXED WHATSAPP CONFIG"""
         success, response = self.run_test(
-            "Request 2FA Code via WhatsApp",
+            "Request 2FA Code via WhatsApp (Fixed Config)",
             "POST",
             "auth/request-2fa",
-            500,  # Expected to fail due to WhatsApp not configured
+            200,  # Should now succeed with fixed WhatsApp configuration
             data={"cnpj": "12345678901234", "password": "123456", "method": "whatsapp"}
         )
         if success:
-            print(f"   ✅ 2FA request processed (unexpected success)")
+            print(f"   ✅ 2FA WhatsApp request successful - code sent to +5534999402367")
+            print(f"   Response: {response}")
             return True
         else:
-            print(f"   ✅ 2FA request failed as expected (WhatsApp not configured)")
-            return True  # This is expected behavior
+            print(f"   ❌ 2FA WhatsApp request failed - WhatsApp config may not be working")
+            return False
 
     def test_2fa_verify_invalid_code(self):
         """Test verifying invalid 2FA code"""
