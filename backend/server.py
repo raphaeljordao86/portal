@@ -559,16 +559,20 @@ async def request_two_factor(request_data: TwoFactorRequest):
     # Generate verification code
     code = generate_verification_code()
     
-    # Send code based on method
+    # Send code based on method using primary contacts
     success = False
     if request_data.method == "email":
-        success = await send_email_code(client["email"], code)
+        email = await get_primary_contact(client, "email")
+        if email:
+            success = await send_email_code(email, code)
+        else:
+            raise HTTPException(status_code=400, detail="No email configured")
     elif request_data.method == "whatsapp":
-        phone = client.get("whatsapp") or client.get("phone")
+        phone = await get_primary_contact(client, "whatsapp")
         if phone:
             success = await send_whatsapp_code(phone, code)
         else:
-            raise HTTPException(status_code=400, detail="WhatsApp number not configured")
+            raise HTTPException(status_code=400, detail="No WhatsApp number configured")
     else:
         raise HTTPException(status_code=400, detail="Invalid method. Use 'email' or 'whatsapp'")
     
