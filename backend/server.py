@@ -577,7 +577,7 @@ async def verify_two_factor(verify_data: TwoFactorVerify):
 
 @api_router.post("/auth/login")
 async def login(client_data: ClientLogin):
-    """Legacy login endpoint - now requires 2FA"""
+    """Login endpoint - with conditional 2FA"""
     cnpj = re.sub(r'[^0-9]', '', client_data.cnpj)
     client = await db.clients.find_one({"cnpj": cnpj})
     
@@ -593,11 +593,36 @@ async def login(client_data: ClientLogin):
             detail="Account is deactivated"
         )
     
-    # Return message indicating 2FA is required
+    # Check if 2FA is enabled for the client and if we have the necessary configurations
+    two_factor_enabled = client.get("two_factor_enabled", False)
+    has_whatsapp_config = bool(ZAPI_TOKEN and ZAPI_INSTANCE_ID)
+    has_email_config = bool(EMAIL_ADDRESS and EMAIL_PASSWORD)
+    
+    # If 2FA is enabled OR if we have external service configurations, require 2FA
+    if two_factor_enabled or has_whatsapp_config or has_email_config:
+        available_methods = []
+        if has_email_config:
+            available_methods.append("email")
+        if has_whatsapp_config and client.get("whatsapp"):
+            available_methods.append("whatsapp")
+        
+        if available_methods:
+            return {
+                "requires_2fa": True,
+                "message": "Two-factor authentication required",
+                "available_methods": available_methods
+            }
+    
+    # Direct login if 2FA is not configured
+    access_token = create_access_token(data={"sub": client["cnpj"]})
     return {
-        "requires_2fa": True,
-        "message": "Two-factor authentication required",
-        "available_methods": ["email", "whatsapp"] if client.get("whatsapp") else ["email"]
+        "access_token": access_token,
+        "token_type": "bearer",
+        "client": {
+            "cnpj": client["cnpj"],
+            "company_name": client["company_name"],
+            "email": client["email"]
+        }
     }
 
 # DEVELOPMENT ONLY: Direct login bypass for testing
