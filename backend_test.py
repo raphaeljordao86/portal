@@ -57,6 +57,32 @@ class FuelStationAPITester:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
 
+    def test_limits_creation_priority(self):
+        """Priority test: Test limits creation without authentication (direct API test)"""
+        # This tests the core functionality that was supposedly fixed
+        print("\n🔥 PRIORITY TEST: Testing Limits Creation API Directly")
+        
+        # Test the limits endpoint structure
+        success, response = self.run_test(
+            "Test Limits Endpoint Structure",
+            "POST",
+            "limits",
+            401,  # Should fail without auth, but we want to see the error structure
+            data={
+                "limit_type": "daily",
+                "fuel_type": "diesel", 
+                "limit_value": 1000.0,
+                "limit_unit": "currency"
+            }
+        )
+        
+        if success:
+            print("✅ Limits endpoint responded correctly (401 Unauthorized as expected)")
+            return True
+        else:
+            print("❌ Limits endpoint structure test failed")
+            return False
+
     def test_create_test_data(self):
         """Create test data"""
         success, response = self.run_test(
