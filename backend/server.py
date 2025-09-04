@@ -1104,7 +1104,7 @@ async def create_test_data():
     
     await db.clients.insert_one(test_client.dict())
     
-    # Create test vehicles
+    # Create test vehicles with different fuel types
     vehicles = [
         Vehicle(
             client_id=test_client.id,
@@ -1121,50 +1121,175 @@ async def create_test_data():
             year=2021,
             fuel_type="diesel",
             driver_name="Maria Santos"
+        ),
+        Vehicle(
+            client_id=test_client.id,
+            license_plate="GHI9012",
+            model="Honda Civic",
+            year=2023,
+            fuel_type="gasoline",
+            driver_name="Carlos Oliveira"
+        ),
+        Vehicle(
+            client_id=test_client.id,
+            license_plate="JKL3456",
+            model="Fiat Uno",
+            year=2020,
+            fuel_type="ethanol",
+            driver_name="Ana Costa"
+        ),
+        Vehicle(
+            client_id=test_client.id,
+            license_plate="MNO7890",
+            model="Toyota Corolla",
+            year=2022,
+            fuel_type="gasoline",
+            driver_name="Pedro Almeida"
         )
     ]
     
     for vehicle in vehicles:
         await db.vehicles.insert_one(vehicle.dict())
     
-    # Create test transactions
+    # Create test limits with current usage
+    limits = [
+        FuelLimit(
+            client_id=test_client.id,
+            vehicle_id=vehicles[0].id,
+            limit_type="daily",
+            fuel_type="diesel",
+            limit_value=300.0,
+            limit_unit="currency",
+            current_usage=180.50,
+            reset_date=datetime.now(timezone.utc) + timedelta(days=1)
+        ),
+        FuelLimit(
+            client_id=test_client.id,
+            vehicle_id=vehicles[1].id,
+            limit_type="weekly",
+            fuel_type="diesel",
+            limit_value=1500.0,
+            limit_unit="currency",
+            current_usage=850.75,
+            reset_date=datetime.now(timezone.utc) + timedelta(days=3)
+        ),
+        FuelLimit(
+            client_id=test_client.id,
+            vehicle_id=vehicles[2].id,
+            limit_type="monthly",
+            fuel_type="gasoline",
+            limit_value=500.0,
+            limit_unit="currency",
+            current_usage=320.25,
+            reset_date=datetime.now(timezone.utc) + timedelta(days=15)
+        ),
+        FuelLimit(
+            client_id=test_client.id,
+            vehicle_id=vehicles[3].id,
+            limit_type="daily",
+            fuel_type="ethanol",
+            limit_value=50.0,
+            limit_unit="liters",
+            current_usage=35.8,
+            reset_date=datetime.now(timezone.utc) + timedelta(days=1)
+        ),
+        FuelLimit(
+            client_id=test_client.id,
+            limit_type="monthly",
+            fuel_type=None,
+            limit_value=3000.0,
+            limit_unit="currency",
+            current_usage=2200.50,
+            reset_date=datetime.now(timezone.utc) + timedelta(days=20)
+        )
+    ]
+    
+    for limit in limits:
+        await db.fuel_limits.insert_one(limit.dict())
+    
+    # Create test transactions with different fuel types
     import random
     transaction_ids = []
-    for i in range(20):
+    fuel_prices = {
+        "diesel": 5.45,
+        "gasoline": 5.89,
+        "ethanol": 3.95
+    }
+    
+    stations = [
+        {"id": "station_001", "name": "Posto Monte Carlo Centro"},
+        {"id": "station_002", "name": "Posto Monte Carlo Sul"},
+        {"id": "station_003", "name": "Posto Monte Carlo Norte"},
+        {"id": "station_004", "name": "Posto Monte Carlo Leste"}
+    ]
+    
+    for i in range(50):  # Increased number of transactions
+        vehicle = vehicles[random.randint(0, 4)]
+        fuel_type = vehicle.fuel_type
+        station = random.choice(stations)
+        
         transaction = FuelTransaction(
             client_id=test_client.id,
-            vehicle_id=vehicles[random.randint(0, 1)].id,
-            license_plate=vehicles[random.randint(0, 1)].license_plate,
-            fuel_type="diesel",
-            liters=random.uniform(30, 80),
-            price_per_liter=5.45,
+            vehicle_id=vehicle.id,
+            license_plate=vehicle.license_plate,
+            fuel_type=fuel_type,
+            liters=random.uniform(25, 80),
+            price_per_liter=fuel_prices[fuel_type],
             total_amount=0,
-            station_id="station_001",
-            station_name="Posto Shell Centro",
-            transaction_date=datetime.now(timezone.utc) - timedelta(days=random.randint(0, 30))
+            station_id=station["id"],
+            station_name=station["name"],
+            transaction_date=datetime.now(timezone.utc) - timedelta(days=random.randint(0, 60))
         )
         transaction.total_amount = transaction.liters * transaction.price_per_liter
         await db.fuel_transactions.insert_one(transaction.dict())
         transaction_ids.append(transaction.id)
     
-    # Create test invoices
-    invoice1 = Invoice(
-        client_id=test_client.id,
-        invoice_number="INV-2024-001",
-        total_amount=2850.75,
-        due_date=datetime.now(timezone.utc) + timedelta(days=15),
-        transactions=transaction_ids[:10]
-    )
-    await db.invoices.insert_one(invoice1.dict())
+    # Create multiple test invoices with more variety
+    invoices = [
+        Invoice(
+            client_id=test_client.id,
+            invoice_number="INV-2024-001",
+            total_amount=2850.75,
+            due_date=datetime.now(timezone.utc) + timedelta(days=15),
+            transactions=transaction_ids[:12],
+            status="open"
+        ),
+        Invoice(
+            client_id=test_client.id,
+            invoice_number="INV-2024-002",
+            total_amount=4200.50,
+            due_date=datetime.now(timezone.utc) + timedelta(days=5),
+            transactions=transaction_ids[12:25],
+            status="open"
+        ),
+        Invoice(
+            client_id=test_client.id,
+            invoice_number="INV-2024-003",
+            total_amount=1850.25,
+            due_date=datetime.now(timezone.utc) - timedelta(days=5),  # Overdue
+            transactions=transaction_ids[25:35],
+            status="overdue"
+        ),
+        Invoice(
+            client_id=test_client.id,
+            invoice_number="INV-2023-012",
+            total_amount=3200.80,
+            due_date=datetime.now(timezone.utc) - timedelta(days=60),
+            transactions=transaction_ids[35:45],
+            status="paid"
+        ),
+        Invoice(
+            client_id=test_client.id,
+            invoice_number="INV-2023-011",
+            total_amount=2750.45,
+            due_date=datetime.now(timezone.utc) - timedelta(days=90),
+            transactions=transaction_ids[45:],
+            status="paid"
+        )
+    ]
     
-    invoice2 = Invoice(
-        client_id=test_client.id,
-        invoice_number="INV-2024-002",
-        total_amount=4200.50,
-        due_date=datetime.now(timezone.utc) + timedelta(days=5),
-        transactions=transaction_ids[10:]
-    )
-    await db.invoices.insert_one(invoice2.dict())
+    for invoice in invoices:
+        await db.invoices.insert_one(invoice.dict())
     
     # Create test credit alert (90% usage)
     alert = CreditAlert(
@@ -1176,7 +1301,7 @@ async def create_test_data():
     )
     await db.credit_alerts.insert_one(alert.dict())
     
-    return {"message": "Test data created successfully with credit system"}
+    return {"message": "Test data created successfully with comprehensive fuel data including all fuel types, multiple vehicles, limits with usage, and various invoices"}
 
 # Include the router in the main app
 app.include_router(api_router)
