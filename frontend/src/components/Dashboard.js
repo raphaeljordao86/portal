@@ -40,6 +40,13 @@ const FUEL_COLORS = {
   ethanol: '#F59E0B'      // Amarelo/Laranja (ANP)
 };
 
+// Tradução dos nomes dos combustíveis
+const FUEL_NAMES = {
+  diesel: 'Diesel S10',
+  gasoline: 'Gasolina Comum',
+  ethanol: 'Etanol'
+};
+
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
