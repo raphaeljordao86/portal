@@ -1076,6 +1076,14 @@ async def get_dashboard_stats_get(current_user: dict = Depends(get_current_user)
 # Test data creation (remove in production)
 @api_router.post("/create-test-data")
 async def create_test_data():
+    # Clear existing test data first
+    await db.clients.delete_many({"cnpj": "12345678901234"})
+    await db.vehicles.delete_many({"license_plate": {"$in": ["ABC1234", "DEF5678", "GHI9012", "JKL3456", "MNO7890"]}})
+    await db.limits.delete_many({})
+    await db.fuel_transactions.delete_many({})
+    await db.invoices.delete_many({})
+    await db.credit_alerts.delete_many({})
+    
     # Create test client with multiple contacts
     test_client = Client(
         cnpj="12345678901234",
