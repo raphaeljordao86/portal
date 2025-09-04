@@ -374,7 +374,7 @@ const Limits = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os combustíveis</SelectItem>
+                    <SelectItem value="all">Todos os combustíveis</SelectItem>
                     <SelectItem value="diesel">Diesel</SelectItem>
                     <SelectItem value="gasoline">Gasolina</SelectItem>
                     <SelectItem value="ethanol">Etanol</SelectItem>
