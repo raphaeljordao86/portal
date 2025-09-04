@@ -714,27 +714,78 @@ async def change_password(password_data: PasswordChange, current_user: dict = De
 # Configuration Routes
 @api_router.get("/settings")
 async def get_settings(current_user: dict = Depends(get_current_user)):
-    """Get client notification settings"""
+    """Get client settings including contacts"""
     return {
-        "notification_email": current_user.get("notification_email"),
-        "notification_whatsapp": current_user.get("notification_whatsapp"),
-        "email_notifications": current_user.get("email_notifications", True),
-        "whatsapp_notifications": current_user.get("whatsapp_notifications", True),
+        "contacts": current_user.get("contacts", []),
         "credit_limit": current_user.get("credit_limit", 10000.0),
         "current_credit_usage": await calculate_client_credit_usage(current_user["id"])
     }
 
 @api_router.put("/settings")
 async def update_settings(settings: NotificationSettings, current_user: dict = Depends(get_current_user)):
-    """Update client notification settings"""
-    update_data = settings.dict()
-    
+    """Update client contacts"""
     await db.clients.update_one(
         {"cnpj": current_user["cnpj"]},
-        {"$set": update_data}
+        {"$set": {"contacts": [contact.dict() for contact in settings.contacts]}}
     )
     
     return {"message": "Settings updated successfully"}
+
+@api_router.post("/contacts")
+async def add_contact(contact_data: ContactCreate, current_user: dict = Depends(get_current_user)):
+    """Add new contact to client"""
+    contact = Contact(**contact_data.dict())
+    
+    # If this is set as primary, unset other primary contacts of the same type
+    if contact.is_primary:
+        contacts = current_user.get("contacts", [])
+        for existing_contact in contacts:
+            if existing_contact["type"] == contact.type:
+                existing_contact["is_primary"] = False
+        
+        await db.clients.update_one(
+            {"cnpj": current_user["cnpj"]},
+            {"$set": {"contacts": contacts}}
+        )
+    
+    # Add new contact
+    await db.clients.update_one(
+        {"cnpj": current_user["cnpj"]},
+        {"$push": {"contacts": contact.dict()}}
+    )
+    
+    return {"message": "Contact added successfully", "contact": contact}
+
+@api_router.delete("/contacts/{contact_id}")
+async def delete_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete contact"""
+    await db.clients.update_one(
+        {"cnpj": current_user["cnpj"]},
+        {"$pull": {"contacts": {"id": contact_id}}}
+    )
+    
+    return {"message": "Contact deleted successfully"}
+
+@api_router.put("/contacts/{contact_id}/primary")
+async def set_primary_contact(contact_id: str, current_user: dict = Depends(get_current_user)):
+    """Set contact as primary"""
+    contacts = current_user.get("contacts", [])
+    contact_type = None
+    
+    # Find the contact and get its type
+    for contact in contacts:
+        if contact["id"] == contact_id:
+            contact_type = contact["type"]
+            contact["is_primary"] = True
+        elif contact["type"] == contact_type:
+            contact["is_primary"] = False
+    
+    await db.clients.update_one(
+        {"cnpj": current_user["cnpj"]},
+        {"$set": {"contacts": contacts}}
+    )
+    
+    return {"message": "Primary contact updated successfully"}
 
 # Credit Alert Routes
 @api_router.get("/credit-alerts")
