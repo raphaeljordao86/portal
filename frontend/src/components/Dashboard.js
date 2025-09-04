@@ -124,32 +124,32 @@ const Dashboard = () => {
       title: 'Total de Veículos',
       value: stats?.vehicles_count || 0,
       icon: Car,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
       description: 'Veículos ativos na frota'
     },
     {
       title: `Consumo ${getPeriodLabel()}`,
       value: `${(stats?.period_total_liters || 0).toFixed(1)}L`,
       icon: Fuel,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
       description: `Litros consumidos no período`
     },
     {
       title: `Gastos ${getPeriodLabel()}`,
       value: formatCurrency(stats?.period_total_amount || 0),
       icon: DollarSign,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
       description: `Total gasto no período`
     },
     {
       title: 'Faturas Abertas',
       value: formatCurrency(stats?.total_open_amount || 0),
       icon: CreditCard,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
       description: `${stats?.open_invoices_count || 0} faturas pendentes`
     }
   ];
