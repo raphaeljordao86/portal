@@ -114,6 +114,15 @@ class ClientLogin(BaseModel):
     cnpj: str
     password: str
 
+class TwoFactorRequest(BaseModel):
+    cnpj: str
+    password: str
+    method: str  # "whatsapp" or "email"
+
+class TwoFactorVerify(BaseModel):
+    cnpj: str
+    code: str
+
 class PasswordChange(BaseModel):
     current_password: str
     new_password: str
