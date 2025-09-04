@@ -93,9 +93,9 @@ const Limits = () => {
   const handleEdit = (limit) => {
     setEditingLimit(limit);
     setFormData({
-      vehicle_id: limit.vehicle_id || '',
+      vehicle_id: limit.vehicle_id || 'all',
       limit_type: limit.limit_type,
-      fuel_type: limit.fuel_type || '',
+      fuel_type: limit.fuel_type || 'all',
       limit_value: limit.limit_value.toString(),
       limit_unit: limit.limit_unit
     });
