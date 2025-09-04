@@ -143,16 +143,21 @@ async def send_whatsapp_code(phone: str, code: str) -> bool:
         if not clean_phone.startswith('55'):
             clean_phone = '55' + clean_phone  # Add Brazil country code if not present
             
-        url = f"https://api.z-api.io/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_TOKEN}/send-messages"
+        url = f"{ZAPI_BASE_URL}/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_TOKEN}/send-text"
         
         payload = {
             "phone": clean_phone,
             "message": f"🔐 *Portal do Cliente*\n\nSeu código de verificação é: *{code}*\n\n⏰ Este código expira em 5 minutos.\n\nSe você não solicitou este código, ignore esta mensagem."
         }
 
-        response = requests.post(url, json=payload, timeout=10)
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
         
         if response.status_code == 200:
+            logger.info(f"WhatsApp message sent successfully to {clean_phone}")
             return True
         else:
             logger.error(f"WhatsApp API error: {response.status_code} - {response.text}")
