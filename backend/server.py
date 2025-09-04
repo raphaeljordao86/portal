@@ -638,6 +638,56 @@ async def change_password(password_data: PasswordChange, current_user: dict = De
     )
     return {"message": "Password changed successfully"}
 
+# Configuration Routes
+@api_router.get("/settings")
+async def get_settings(current_user: dict = Depends(get_current_user)):
+    """Get client notification settings"""
+    return {
+        "notification_email": current_user.get("notification_email"),
+        "notification_whatsapp": current_user.get("notification_whatsapp"),
+        "email_notifications": current_user.get("email_notifications", True),
+        "whatsapp_notifications": current_user.get("whatsapp_notifications", True),
+        "credit_limit": current_user.get("credit_limit", 10000.0),
+        "current_credit_usage": await calculate_client_credit_usage(current_user["id"])
+    }
+
+@api_router.put("/settings")
+async def update_settings(settings: NotificationSettings, current_user: dict = Depends(get_current_user)):
+    """Update client notification settings"""
+    update_data = settings.dict()
+    
+    await db.clients.update_one(
+        {"cnpj": current_user["cnpj"]},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Settings updated successfully"}
+
+# Credit Alert Routes
+@api_router.get("/credit-alerts")
+async def get_credit_alerts(current_user: dict = Depends(get_current_user)):
+    """Get active credit alerts for client"""
+    alerts = await db.credit_alerts.find({
+        "client_id": current_user["id"],
+        "dismissed": False,
+        "created_at": {"$gte": datetime.now(timezone.utc) - timedelta(days=7)}
+    }).sort("created_at", -1).to_list(10)
+    
+    return [CreditAlert(**alert) for alert in alerts]
+
+@api_router.post("/credit-alerts/{alert_id}/dismiss")
+async def dismiss_credit_alert(alert_id: str, current_user: dict = Depends(get_current_user)):
+    """Dismiss a credit alert"""
+    result = await db.credit_alerts.update_one(
+        {"id": alert_id, "client_id": current_user["id"]},
+        {"$set": {"dismissed": True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    
+    return {"message": "Alert dismissed"}
+
 # Vehicle Routes
 @api_router.get("/vehicles", response_model=List[Vehicle])
 async def get_vehicles(current_user: dict = Depends(get_current_user)):
