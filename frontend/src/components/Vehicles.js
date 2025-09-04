@@ -372,10 +372,25 @@ const Vehicles = () => {
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={handleCloseDialog} className="flex-1">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCloseDialog} 
+                className="flex-1"
+                disabled={loading}
+              >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading} className="flex-1">
+              <Button 
+                type="submit" 
+                disabled={loading} 
+                className="flex-1 relative z-10"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit(e);
+                }}
+              >
                 {loading ? 'Salvando...' : editingVehicle ? 'Atualizar' : 'Cadastrar'}
               </Button>
             </div>
