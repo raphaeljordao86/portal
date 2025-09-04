@@ -123,11 +123,14 @@ backend:
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Enhanced create-test-data endpoint with 5 vehicles, multiple fuel types (diesel, gasoline, ethanol), 5 fuel limits with current usage, 50 transactions across different stations, and 5 invoices with varied statuses (open, overdue, paid). Added FuelLimit model definition."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED SUCCESSFULLY: Enhanced test data creation working perfectly. Creates 5 vehicles with all fuel types (diesel, gasoline, ethanol), 5 limits with current usage > 0, 50 transactions across 4 different stations, and 5 invoices with all statuses (open, overdue, paid). Fixed collection name mismatch between fuel_limits and limits. Authentication with test credentials (CNPJ: 12345678901234, password: 123456) working correctly."
 
   - task: "Fix delete button functionality in limits"
     implemented: true
@@ -135,11 +138,29 @@ backend:
     file: "server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Backend endpoints for limits deletion should work correctly - issue likely in frontend event handling"
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED SUCCESSFULLY: DELETE /api/limits/{id} endpoint working correctly. Added missing DELETE endpoint implementation. Successfully tested limit creation, deletion, and verification. Limits are properly soft-deleted (marked as inactive) and removed from API responses."
+
+  - task: "Dashboard stats endpoint fix"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ISSUE FOUND: Dashboard stats endpoint (POST /api/dashboard/stats) returning 500 Internal Server Error due to MongoDB ObjectId serialization issue in recent_transactions field."
+      - working: true
+        agent: "testing"
+        comment: "✅ FIXED AND TESTED: Fixed ObjectId serialization issue by properly converting transaction objects to FuelTransaction models before returning in dashboard stats. Both GET and POST /api/dashboard/stats endpoints now working correctly with proper fuel breakdown and statistics."
 
 frontend:
   - task: "Login component color change and branding update"
