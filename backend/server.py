@@ -901,6 +901,17 @@ async def create_limit(limit_data: LimitCreate, current_user: dict = Depends(get
     await db.limits.insert_one(limit.dict())
     return limit
 
+@api_router.delete("/limits/{limit_id}")
+async def delete_limit(limit_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a fuel limit"""
+    result = await db.limits.update_one(
+        {"id": limit_id, "client_id": current_user["id"]},
+        {"$set": {"is_active": False}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Limit not found")
+    return {"message": "Limit deleted successfully"}
+
 # Transactions Routes
 @api_router.get("/transactions")
 async def get_transactions(current_user: dict = Depends(get_current_user)):
