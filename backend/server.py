@@ -418,10 +418,18 @@ class TwoFactorVerify(BaseModel):
     code: str
 
 class NotificationSettings(BaseModel):
-    notification_email: Optional[str] = None
-    notification_whatsapp: Optional[str] = None
-    email_notifications: bool = True
-    whatsapp_notifications: bool = True
+    contacts: List[Contact] = []
+
+class ContactCreate(BaseModel):
+    type: str
+    value: str
+    is_primary: bool = False
+    label: str = ""
+
+class DashboardFilter(BaseModel):
+    period: str = "monthly"  # "daily", "weekly", "monthly", "custom"
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
 
 class CreditAlert(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
