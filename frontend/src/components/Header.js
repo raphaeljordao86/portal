@@ -20,7 +20,7 @@ const Header = ({ setSidebarOpen }) => {
             <Menu className="w-8 h-8" />
           </Button>
           <div className="ml-4 lg:ml-0">
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-gray-900">
               Bem vindo ao Portal de Clientes Monte Carlo
             </h1>
             <p className="text-sm text-gray-600">
