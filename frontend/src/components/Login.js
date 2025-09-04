@@ -330,7 +330,7 @@ const Login = () => {
                   <Button
                     type="submit"
                     disabled={loading || verificationCode.length !== 6}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800"
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                     {loading ? 'Verificando...' : 'Entrar'}
