@@ -120,9 +120,9 @@ const Limits = () => {
     setShowDialog(false);
     setEditingLimit(null);
     setFormData({
-      vehicle_id: '',
+      vehicle_id: 'all',
       limit_type: 'daily',
-      fuel_type: '',
+      fuel_type: 'all',
       limit_value: '',
       limit_unit: 'currency'
     });
