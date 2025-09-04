@@ -151,10 +151,13 @@ async def send_whatsapp_code(phone: str, code: str) -> bool:
         }
 
         headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Client-Token': ZAPI_SECURITY_TOKEN
         }
 
         response = requests.post(url, json=payload, headers=headers, timeout=10)
+        
+        logger.info(f"WhatsApp API Response: {response.status_code} - {response.text}")
         
         if response.status_code == 200:
             logger.info(f"WhatsApp message sent successfully to {clean_phone}")
