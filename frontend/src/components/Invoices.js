@@ -554,7 +554,7 @@ const Invoices = () => {
                             <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-medium text-gray-900">{transaction.license_plate}</h4>
                               <Badge variant="outline" className="text-xs">
-                                {transaction.fuel_type}
+                                {FUEL_NAMES[transaction.fuel_type] || transaction.fuel_type}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-4 text-sm text-gray-500">
