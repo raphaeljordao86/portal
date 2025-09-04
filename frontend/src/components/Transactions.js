@@ -317,7 +317,7 @@ const Transactions = () => {
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold text-gray-900">{transaction.license_plate}</h3>
                         <Badge className={getFuelTypeColor(transaction.fuel_type)}>
-                          {transaction.fuel_type}
+                          {FUEL_NAMES[transaction.fuel_type] || transaction.fuel_type}
                         </Badge>
                         <Badge className={getStatusColor(transaction.status)}>
                           {transaction.status}
