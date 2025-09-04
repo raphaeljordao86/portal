@@ -1205,7 +1205,7 @@ async def create_test_data():
     ]
     
     for limit in limits:
-        await db.fuel_limits.insert_one(limit.dict())
+        await db.limits.insert_one(limit.dict())
     
     # Create test transactions with different fuel types
     import random
