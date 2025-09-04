@@ -13,6 +13,12 @@ from datetime import datetime, timezone, timedelta
 import jwt
 from passlib.context import CryptContext
 import re
+import random
+import aiosmtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import requests
+import asyncio
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
