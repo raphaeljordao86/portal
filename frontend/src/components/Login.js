@@ -61,7 +61,7 @@ const Login = () => {
         setStep('2fa-method');
         toast.info('Autenticação de dois fatores necessária');
       } else {
-        // Legacy: direct login (should not happen with new implementation)
+        // Direct login successful
         const { access_token, client } = response.data;
         login(access_token, client);
         toast.success('Login realizado com sucesso!');
