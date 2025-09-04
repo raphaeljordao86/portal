@@ -351,6 +351,19 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         fuel_breakdown[fuel_type]["liters"] += transaction["liters"]
         fuel_breakdown[fuel_type]["amount"] += transaction["total_amount"]
     
+    # Convert recent transactions to serializable format
+    recent_transactions = []
+    if month_transactions:
+        for transaction in month_transactions[-10:]:
+            recent_transactions.append({
+                "id": transaction["id"],
+                "license_plate": transaction["license_plate"],
+                "fuel_type": transaction["fuel_type"],
+                "liters": transaction["liters"],
+                "total_amount": transaction["total_amount"],
+                "transaction_date": transaction["transaction_date"].isoformat() if isinstance(transaction["transaction_date"], datetime) else transaction["transaction_date"]
+            })
+    
     return {
         "vehicles_count": vehicles_count,
         "month_total_amount": total_month_amount,
@@ -358,7 +371,7 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "open_invoices_count": len(open_invoices),
         "total_open_amount": total_open_amount,
         "fuel_breakdown": fuel_breakdown,
-        "recent_transactions": month_transactions[-10:] if month_transactions else []
+        "recent_transactions": recent_transactions
     }
 
 # Test data creation (remove in production)
