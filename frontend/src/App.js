@@ -10,6 +10,7 @@ import Vehicles from './components/Vehicles';
 import Limits from './components/Limits';
 import Transactions from './components/Transactions';
 import Invoices from './components/Invoices';
+import Settings from './components/Settings';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { Toaster } from './components/ui/sonner';
