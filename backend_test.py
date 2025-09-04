@@ -94,19 +94,15 @@ class FuelStationAPITester:
         return success
 
     def get_test_token(self):
-        """Get a test token by creating a temporary client without 2FA for testing"""
+        """Get a test token using the development login endpoint"""
         # First try to create test data
         self.test_create_test_data()
         
-        # For testing purposes, we'll simulate getting a token
-        # In a real scenario, we'd need to complete the 2FA flow
-        # But since email/WhatsApp aren't configured, we'll use a workaround
-        
-        # Try the old login method first to see current behavior
+        # Try the development login endpoint that bypasses 2FA
         success, response = self.run_test(
-            "Get Test Token",
+            "Get Test Token (Dev Mode)",
             "POST", 
-            "auth/login",
+            "auth/login-dev",
             200,
             data={"cnpj": "12.345.678/9012-34", "password": "123456"}
         )
@@ -114,13 +110,21 @@ class FuelStationAPITester:
         if success and 'access_token' in response:
             self.token = response['access_token']
             print(f"   Token obtained: {self.token[:20]}...")
+            print(f"   Dev mode: {response.get('dev_mode', False)}")
             return True
-        elif success and response.get('requires_2fa'):
-            print(f"   ⚠️  2FA required - cannot get token for testing without email/WhatsApp setup")
-            print(f"   Available methods: {response.get('available_methods', [])}")
-            return False
         else:
-            print(f"   ❌ Failed to get test token")
+            print(f"   ❌ Failed to get test token via dev endpoint")
+            # Fallback to regular login to show 2FA requirement
+            success, response = self.run_test(
+                "Regular Login (Should Require 2FA)",
+                "POST", 
+                "auth/login",
+                200,
+                data={"cnpj": "12.345.678/9012-34", "password": "123456"}
+            )
+            if success and response.get('requires_2fa'):
+                print(f"   ⚠️  2FA required - cannot get token for testing without email/WhatsApp setup")
+                print(f"   Available methods: {response.get('available_methods', [])}")
             return False
         """Create test data"""
         success, response = self.run_test(
