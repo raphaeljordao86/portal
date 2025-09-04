@@ -125,8 +125,10 @@ class FuelStationAPITester:
 
     def test_create_vehicle(self):
         """Test creating a new vehicle"""
+        import random
+        random_num = random.randint(1000, 9999)
         vehicle_data = {
-            "license_plate": "XYZ9876",
+            "license_plate": f"TST{random_num}",
             "model": "Ford Transit",
             "year": 2023,
             "fuel_type": "diesel",
