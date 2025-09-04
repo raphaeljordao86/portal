@@ -367,6 +367,96 @@ class FuelStationAPITester:
                 print(f"   - {invoice['invoice_number']}: R$ {invoice['total_amount']:.2f} ({invoice['status']})")
         return success
 
+    def test_credit_status(self):
+        """Test credit status endpoint"""
+        success, response = self.run_test(
+            "Get Credit Status",
+            "GET",
+            "credit-status",
+            200
+        )
+        if success:
+            print(f"   Credit Limit: R$ {response.get('credit_limit', 0):.2f}")
+            print(f"   Current Usage: R$ {response.get('current_usage', 0):.2f}")
+            print(f"   Available Credit: R$ {response.get('available_credit', 0):.2f}")
+            print(f"   Usage Percentage: {response.get('usage_percentage', 0):.1f}%")
+            print(f"   Status: {response.get('status', 'unknown')}")
+        return success
+
+    def test_credit_alerts(self):
+        """Test credit alerts endpoint"""
+        success, response = self.run_test(
+            "Get Credit Alerts",
+            "GET",
+            "credit-alerts",
+            200
+        )
+        if success:
+            print(f"   Found {len(response)} active credit alerts")
+            for alert in response:
+                print(f"   - {alert.get('alert_type', 'unknown')}% alert: {alert.get('percentage', 0):.1f}% usage")
+        return success
+
+    def test_settings_get(self):
+        """Test getting settings"""
+        success, response = self.run_test(
+            "Get Settings",
+            "GET",
+            "settings",
+            200
+        )
+        if success:
+            print(f"   Email notifications: {response.get('email_notifications', False)}")
+            print(f"   WhatsApp notifications: {response.get('whatsapp_notifications', False)}")
+            print(f"   Notification email: {response.get('notification_email', 'Not set')}")
+            print(f"   Credit limit: R$ {response.get('credit_limit', 0):.2f}")
+        return success
+
+    def test_settings_update(self):
+        """Test updating settings"""
+        settings_data = {
+            "notification_email": "test@example.com",
+            "notification_whatsapp": "(11) 99999-9999",
+            "email_notifications": True,
+            "whatsapp_notifications": True
+        }
+        success, response = self.run_test(
+            "Update Settings",
+            "PUT",
+            "settings",
+            200,
+            data=settings_data
+        )
+        return success
+
+    def test_invoice_details(self):
+        """Test invoice details endpoint"""
+        # First get an invoice ID
+        success, invoices = self.run_test(
+            "Get Invoices for Details Test",
+            "GET",
+            "invoices",
+            200
+        )
+        
+        if success and invoices and len(invoices) > 0:
+            invoice_id = invoices[0]['id']
+            success, response = self.run_test(
+                "Get Invoice Details",
+                "GET",
+                f"invoices/{invoice_id}/details",
+                200
+            )
+            if success:
+                print(f"   Invoice: {response.get('invoice', {}).get('invoice_number', 'Unknown')}")
+                print(f"   Transactions: {response.get('transaction_count', 0)}")
+                print(f"   Total Liters: {response.get('total_liters', 0):.1f}L")
+                print(f"   Total Amount: R$ {response.get('total_amount', 0):.2f}")
+            return success
+        else:
+            print("   ⚠️  No invoices available for details test")
+            return True  # Not a failure, just no data
+
     def test_change_password(self):
         """Test password change"""
         password_data = {
