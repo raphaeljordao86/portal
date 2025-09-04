@@ -284,8 +284,12 @@ const Vehicles = () => {
       )}
 
       {/* Vehicle Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={showDialog} onOpenChange={(open) => !loading && setShowDialog(open)}>
+        <DialogContent 
+          className="sm:max-w-md" 
+          onPointerDownOutside={(e) => loading && e.preventDefault()}
+          onEscapeKeyDown={(e) => loading && e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>
               {editingVehicle ? 'Editar Veículo' : 'Novo Veículo'}
@@ -298,7 +302,7 @@ const Vehicles = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="space-y-2">
               <Label htmlFor="license_plate">Placa do Veículo *</Label>
               <Input
