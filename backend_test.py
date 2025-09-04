@@ -1,7 +1,7 @@
 import requests
 import sys
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class FuelStationAPITester:
     def __init__(self, base_url="https://fuel-client-portal.preview.emergentagent.com/api"):
