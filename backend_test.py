@@ -406,7 +406,10 @@ def main():
     if not tester.test_login_invalid():
         print("❌ Invalid login test failed")
 
-    print("\n📋 PHASE 2: New 2FA Authentication System")
+    print("\n📋 PHASE 2.5: Priority Limits API Structure Test")
+    tester.test_limits_creation_priority()
+    
+    print("\n📋 PHASE 3: New 2FA Authentication System")
     if not tester.test_login_requires_2fa():
         print("❌ 2FA requirement test failed")
     
