@@ -49,7 +49,8 @@ EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD', '')
 # Z-API WhatsApp configuration
 ZAPI_TOKEN = os.environ.get('ZAPI_TOKEN', '')
 ZAPI_INSTANCE_ID = os.environ.get('ZAPI_INSTANCE_ID', '')
-ZAPI_BASE_URL = os.environ.get('ZAPI_BASE_URL', '')
+ZAPI_BASE_URL = os.environ.get('ZAPI_BASE_URL', 'https://api.z-api.io')
+ZAPI_SECURITY_TOKEN = os.environ.get('ZAPI_SECURITY_TOKEN', '')
 
 # Utility functions
 def verify_password(plain_password, hashed_password):
