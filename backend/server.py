@@ -639,9 +639,13 @@ async def login(client_data: ClientLogin):
     # If 2FA is enabled OR if we have external service configurations, require 2FA
     if two_factor_enabled or has_whatsapp_config or has_email_config:
         available_methods = []
-        if has_email_config:
+        
+        # Check if client has email contacts
+        if has_email_config and (await get_primary_contact(client, "email")):
             available_methods.append("email")
-        if has_whatsapp_config and client.get("whatsapp"):
+        
+        # Check if client has WhatsApp contacts  
+        if has_whatsapp_config and (await get_primary_contact(client, "whatsapp")):
             available_methods.append("whatsapp")
         
         if available_methods:
