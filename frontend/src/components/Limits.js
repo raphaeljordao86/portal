@@ -336,7 +336,7 @@ const Limits = () => {
                   <SelectValue placeholder="Selecione um veículo ou deixe em branco para todos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os veículos</SelectItem>
+                  <SelectItem value="all">Todos os veículos</SelectItem>
                   {vehicles.map((vehicle) => (
                     <SelectItem key={vehicle.id} value={vehicle.id}>
                       {vehicle.license_plate} - {vehicle.model}
