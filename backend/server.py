@@ -242,6 +242,22 @@ class TwoFactorVerify(BaseModel):
     cnpj: str
     code: str
 
+class NotificationSettings(BaseModel):
+    notification_email: Optional[str] = None
+    notification_whatsapp: Optional[str] = None
+    email_notifications: bool = True
+    whatsapp_notifications: bool = True
+
+class CreditAlert(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str
+    alert_type: str  # "70", "80", "90", "100"
+    current_usage: float
+    credit_limit: float
+    percentage: float
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    dismissed: bool = False
+
 class PasswordChange(BaseModel):
     current_password: str
     new_password: str
