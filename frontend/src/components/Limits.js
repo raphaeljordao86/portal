@@ -307,8 +307,12 @@ const Limits = () => {
       )}
 
       {/* Limit Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={showDialog} onOpenChange={(open) => !loading && setShowDialog(open)}>
+        <DialogContent 
+          className="sm:max-w-md"
+          onPointerDownOutside={(e) => loading && e.preventDefault()}
+          onEscapeKeyDown={(e) => loading && e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>
               {editingLimit ? 'Editar Limite' : 'Novo Limite'}
@@ -321,7 +325,7 @@ const Limits = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" onClick={(e) => e.stopPropagation()}>
             <div className="space-y-2">
               <Label htmlFor="vehicle_id">Veículo (Opcional)</Label>
               <Select 
