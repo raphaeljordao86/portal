@@ -362,23 +362,26 @@ async def send_email_code(email: str, subject: str, message: str = None, code: s
         return False
 
 # Pydantic Models
+class Contact(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: str  # "email" or "whatsapp"
+    value: str  # email address or phone number
+    is_primary: bool = False
+    label: str = ""  # e.g., "Pessoal", "Comercial", "Financeiro"
+
 class Client(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     cnpj: str
     company_name: str
-    email: str
-    phone: str
-    whatsapp: Optional[str] = None
+    email: str  # Main email for basic info
+    phone: str  # Main phone for basic info
+    contacts: List[Contact] = []  # Multiple contacts
     password_hash: str
     is_active: bool = True
     two_factor_enabled: bool = False
     # Credit limit and notifications
     credit_limit: float = 10000.0  # Default credit limit
     current_credit_usage: float = 0.0
-    notification_email: Optional[str] = None
-    notification_whatsapp: Optional[str] = None
-    email_notifications: bool = True
-    whatsapp_notifications: bool = True
     last_70_alert: Optional[datetime] = None
     last_80_alert: Optional[datetime] = None
     last_90_alert: Optional[datetime] = None
