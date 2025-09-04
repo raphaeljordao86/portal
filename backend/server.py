@@ -1322,6 +1322,22 @@ async def create_test_data():
     
     return {"message": "Test data created successfully with comprehensive fuel data including all fuel types, multiple vehicles, limits with usage, and various invoices"}
 
+# Development bypass route (remove in production)
+@api_router.post("/auth/login-dev")
+async def dev_login():
+    """Development login bypass - REMOVE IN PRODUCTION"""
+    client = await db.clients.find_one({"cnpj": "12345678901234"})
+    if not client:
+        raise HTTPException(status_code=404, detail="Test client not found. Create test data first.")
+    
+    access_token = create_access_token(data={"sub": client["cnpj"]})
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "client": Client(**client).dict(),
+        "requires_2fa": False
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
