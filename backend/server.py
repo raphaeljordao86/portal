@@ -782,6 +782,10 @@ async def get_vehicle_transactions(vehicle_id: str, current_user: dict = Depends
 @api_router.get("/invoices")
 async def get_invoices(current_user: dict = Depends(get_current_user)):
     invoices = await db.invoices.find({"client_id": current_user["id"]}).sort("created_at", -1).to_list(100)
+    
+    # Check credit alerts after invoice operations
+    await check_credit_alerts(current_user["id"], current_user)
+    
     return [Invoice(**invoice) for invoice in invoices]
 
 @api_router.get("/invoices/open")
@@ -790,7 +794,60 @@ async def get_open_invoices(current_user: dict = Depends(get_current_user)):
         "client_id": current_user["id"],
         "status": {"$in": ["open", "overdue"]}
     }).sort("due_date", 1).to_list(100)
+    
+    # Check credit alerts
+    await check_credit_alerts(current_user["id"], current_user)
+    
     return [Invoice(**invoice) for invoice in invoices]
+
+@api_router.get("/invoices/{invoice_id}/details")
+async def get_invoice_details(invoice_id: str, current_user: dict = Depends(get_current_user)):
+    """Get detailed invoice information including all transactions"""
+    invoice = await db.invoices.find_one({"id": invoice_id, "client_id": current_user["id"]})
+    
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    
+    # Get transactions for this invoice
+    transactions = []
+    if invoice.get("transactions"):
+        transactions = await db.fuel_transactions.find({
+            "id": {"$in": invoice["transactions"]}
+        }).sort("transaction_date", -1).to_list(None)
+    else:
+        # If no specific transactions linked, get transactions by date range (fallback)
+        invoice_date = invoice["created_at"]
+        start_date = invoice_date.replace(day=1)  # First day of the month
+        end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(days=1)  # Last day of the month
+        
+        transactions = await db.fuel_transactions.find({
+            "client_id": current_user["id"],
+            "transaction_date": {"$gte": start_date, "$lte": end_date}
+        }).sort("transaction_date", -1).to_list(None)
+    
+    return {
+        "invoice": Invoice(**invoice),
+        "transactions": [FuelTransaction(**t) for t in transactions],
+        "transaction_count": len(transactions),
+        "total_liters": sum(t["liters"] for t in transactions),
+        "total_amount": sum(t["total_amount"] for t in transactions)
+    }
+
+@api_router.get("/credit-status")
+async def get_credit_status(current_user: dict = Depends(get_current_user)):
+    """Get current credit status and limits"""
+    credit_limit = current_user.get("credit_limit", 10000.0)
+    current_usage = await calculate_client_credit_usage(current_user["id"])
+    available_credit = max(0, credit_limit - current_usage)
+    usage_percentage = (current_usage / credit_limit * 100) if credit_limit > 0 else 0
+    
+    return {
+        "credit_limit": credit_limit,
+        "current_usage": current_usage,
+        "available_credit": available_credit,
+        "usage_percentage": usage_percentage,
+        "status": "critical" if usage_percentage >= 100 else "warning" if usage_percentage >= 90 else "normal"
+    }
 
 # Dashboard Routes
 @api_router.get("/dashboard/stats")
