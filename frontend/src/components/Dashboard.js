@@ -176,80 +176,76 @@ const Dashboard = () => {
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-end">
+      <div className="flex flex-col lg:flex-row gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
+        <div className="lg:w-48">
+          <Label htmlFor="period">Período</Label>
+          <Select value={period} onValueChange={setPeriod}>
+            <SelectTrigger>
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="daily">Hoje</SelectItem>
+              <SelectItem value="weekly">Esta Semana</SelectItem>
+              <SelectItem value="monthly">Este Mês</SelectItem>
+              <SelectItem value="custom">Período Personalizado</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {period === 'custom' && (
+          <>
             <div className="lg:w-48">
-              <Label htmlFor="period">Período</Label>
-              <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger>
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">Hoje</SelectItem>
-                  <SelectItem value="weekly">Esta Semana</SelectItem>
-                  <SelectItem value="monthly">Este Mês</SelectItem>
-                  <SelectItem value="custom">Período Personalizado</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label>Data Inicial</Label>
+              <Popover open={showStartCalendar} onOpenChange={setShowStartCalendar}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {customStartDate ? format(customStartDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customStartDate}
+                    onSelect={setCustomStartDate}
+                    locale={ptBR}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
-            {period === 'custom' && (
-              <>
-                <div className="lg:w-48">
-                  <Label>Data Inicial</Label>
-                  <Popover open={showStartCalendar} onOpenChange={setShowStartCalendar}>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {customStartDate ? format(customStartDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={customStartDate}
-                        onSelect={setCustomStartDate}
-                        locale={ptBR}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+            <div className="lg:w-48">
+              <Label>Data Final</Label>
+              <Popover open={showEndCalendar} onOpenChange={setShowEndCalendar}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {customEndDate ? format(customEndDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={customEndDate}
+                    onSelect={setCustomEndDate}
+                    locale={ptBR}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </>
+        )}
 
-                <div className="lg:w-48">
-                  <Label>Data Final</Label>
-                  <Popover open={showEndCalendar} onOpenChange={setShowEndCalendar}>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {customEndDate ? format(customEndDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={customEndDate}
-                        onSelect={setCustomEndDate}
-                        locale={ptBR}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </>
-            )}
-
-            {stats && (
-              <div className="text-sm text-gray-600">
-                <p>Período: {new Date(stats.start_date).toLocaleDateString('pt-BR')} - {new Date(stats.end_date).toLocaleDateString('pt-BR')}</p>
-                <p>Total de transações: {stats.total_transactions}</p>
-              </div>
-            )}
+        {stats && (
+          <div className="text-sm text-gray-600">
+            <p>Período: {new Date(stats.start_date).toLocaleDateString('pt-BR')} - {new Date(stats.end_date).toLocaleDateString('pt-BR')}</p>
+            <p>Total de transações: {stats.total_transactions}</p>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
