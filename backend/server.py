@@ -402,6 +402,38 @@ async def login(client_data: ClientLogin):
         "available_methods": ["email", "whatsapp"] if client.get("whatsapp") else ["email"]
     }
 
+# DEVELOPMENT ONLY: Direct login bypass for testing
+@api_router.post("/auth/login-dev")
+async def login_dev(client_data: ClientLogin):
+    """Development only: Direct login bypass for testing (remove in production)"""
+    cnpj = re.sub(r'[^0-9]', '', client_data.cnpj)
+    client = await db.clients.find_one({"cnpj": cnpj})
+    
+    if not client or not verify_password(client_data.password, client["password_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid CNPJ or password"
+        )
+    
+    if not client["is_active"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is deactivated"
+        )
+    
+    # Direct login without 2FA for development testing
+    access_token = create_access_token(data={"sub": client["cnpj"]})
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "client": {
+            "cnpj": client["cnpj"],
+            "company_name": client["company_name"],
+            "email": client["email"]
+        },
+        "dev_mode": True
+    }
+
 @api_router.post("/auth/change-password")
 async def change_password(password_data: PasswordChange, current_user: dict = Depends(get_current_user)):
     if not verify_password(password_data.current_password, current_user["password_hash"]):
