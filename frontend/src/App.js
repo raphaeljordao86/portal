@@ -132,6 +132,7 @@ function App() {
                       <Route path="/limits" element={<Limits />} />
                       <Route path="/transactions" element={<Transactions />} />
                       <Route path="/invoices" element={<Invoices />} />
+                      <Route path="/settings" element={<Settings />} />
                     </Routes>
                   </AppLayout>
                 </ProtectedRoute>
