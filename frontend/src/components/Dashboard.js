@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
+import CreditAlerts from './CreditAlerts';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -26,6 +28,7 @@ const API = `${BACKEND_URL}/api`;
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDashboardStats();
@@ -84,8 +87,8 @@ const Dashboard = () => {
       title: 'Total de Veículos',
       value: stats?.vehicles_count || 0,
       icon: Car,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
       description: 'Veículos ativos na frota'
     },
     {
@@ -100,22 +103,25 @@ const Dashboard = () => {
       title: 'Gastos do Mês',
       value: formatCurrency(stats?.month_total_amount || 0),
       icon: DollarSign,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
       description: 'Total gasto em combustível'
     },
     {
       title: 'Faturas Abertas',
       value: formatCurrency(stats?.total_open_amount || 0),
       icon: CreditCard,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
       description: `${stats?.open_invoices_count || 0} faturas pendentes`
     }
   ];
 
   return (
     <div className="space-y-6">
+      {/* Credit Alerts */}
+      <CreditAlerts />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -202,8 +208,8 @@ const Dashboard = () => {
               {stats?.recent_transactions?.slice(0, 5).map((transaction, index) => (
                 <div key={index} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Fuel className="w-4 h-4 text-blue-600" />
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                      <Fuel className="w-4 h-4 text-orange-600" />
                     </div>
                     <div>
                       <p className="font-medium text-sm">{transaction.license_plate}</p>
@@ -241,20 +247,36 @@ const Dashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <Car className="w-6 h-6" />
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col gap-2 hover:bg-orange-50 hover:border-orange-200"
+              onClick={() => navigate('/vehicles')}
+            >
+              <Car className="w-6 h-6 text-orange-600" />
               <span>Gerenciar Veículos</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <AlertTriangle className="w-6 h-6" />
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col gap-2 hover:bg-yellow-50 hover:border-yellow-200"
+              onClick={() => navigate('/limits')}
+            >
+              <AlertTriangle className="w-6 h-6 text-yellow-600" />
               <span>Configurar Limites</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <BarChart3 className="w-6 h-6" />
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col gap-2 hover:bg-blue-50 hover:border-blue-200"
+              onClick={() => navigate('/transactions')}
+            >
+              <BarChart3 className="w-6 h-6 text-blue-600" />
               <span>Ver Relatórios</span>
             </Button>
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <CreditCard className="w-6 h-6" />
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col gap-2 hover:bg-red-50 hover:border-red-200"
+              onClick={() => navigate('/invoices')}
+            >
+              <CreditCard className="w-6 h-6 text-red-600" />
               <span>Faturas Abertas</span>
             </Button>
           </div>
