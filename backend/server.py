@@ -138,10 +138,8 @@ async def send_whatsapp_code(phone: str, code: str) -> bool:
             logger.warning("Z-API credentials not configured")
             return False
             
-        # Format phone number (remove non-digits and ensure it starts with country code)
-        clean_phone = re.sub(r'[^0-9]', '', phone)
-        if not clean_phone.startswith('55'):
-            clean_phone = '55' + clean_phone  # Add Brazil country code if not present
+        # Use fixed phone number for now
+        clean_phone = "5534999402367"  # Fixed number: +5534999402367
             
         url = f"{ZAPI_BASE_URL}/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_TOKEN}/send-text"
         
