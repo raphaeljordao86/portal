@@ -148,12 +148,12 @@ const Login = () => {
       <div className="w-full max-w-md space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
             <Fuel className="w-8 h-8 text-white" />
           </div>
           <div>
             <h2 className="text-3xl font-bold text-gray-900">Portal do Cliente</h2>
-            <p className="text-gray-600 mt-2">Rede de Postos de Combustível</p>
+            <p className="text-gray-600 mt-2">Rede de Postos Monte Carlo</p>
           </div>
         </div>
 
@@ -216,7 +216,7 @@ const Login = () => {
 
                 <Button
                   type="submit"
-                  className="w-full h-11 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 transition-all duration-200 shadow-lg"
+                  className="w-full h-11 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 transition-all duration-200 shadow-lg"
                   disabled={loading}
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -330,7 +330,7 @@ const Login = () => {
                   <Button
                     type="submit"
                     disabled={loading || verificationCode.length !== 6}
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                     {loading ? 'Verificando...' : 'Entrar'}

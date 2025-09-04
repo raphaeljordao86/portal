@@ -54,12 +54,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                <Fuel className="w-6 h-6 text-white" />
-              </div>
+              <img 
+                src="https://customer-assets.emergentagent.com/job_fuelcontrol-dash/artifacts/1q79ov19_logo%20montecarlo.PNG" 
+                alt="Monte Carlo"
+                className="w-10 h-10 object-contain"
+              />
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">FuelManager</h1>
-                <p className="text-xs text-gray-500">Portal do Cliente</p>
+                <h1 className="text-lg font-semibold text-gray-900">Portal do Cliente</h1>
               </div>
             </div>
             <Button
@@ -73,9 +74,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
           </div>
 
           {/* User Info */}
-          <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-b border-gray-200">
+          <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
                 <Building className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
@@ -98,7 +99,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                 className={({ isActive }) =>
                   `flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg'
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg'
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`
                 }
