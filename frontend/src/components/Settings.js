@@ -78,9 +78,6 @@ const Settings = () => {
     setSettings({...settings, notification_whatsapp: formatted});
   };
 
-  const availableCredit = Math.max(0, settings.credit_limit - settings.current_credit_usage);
-  const usagePercentage = settings.credit_limit > 0 ? (settings.current_credit_usage / settings.credit_limit) * 100 : 0;
-
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
