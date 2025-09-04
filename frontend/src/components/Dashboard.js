@@ -176,7 +176,7 @@ const Dashboard = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col lg:flex-row gap-4 items-end bg-white p-4 rounded-lg border border-gray-200">
+      <div className="flex flex-col lg:flex-row gap-4 items-end">
         <div className="lg:w-48">
           <Label htmlFor="period">Período</Label>
           <Select value={period} onValueChange={setPeriod}>
