@@ -50,8 +50,7 @@ const Login = () => {
 
     try {
       const cleanCnpj = cnpj.replace(/\D/g, '');
-      // Use dev endpoint for testing (bypasses 2FA)
-      const response = await axios.post(`${API}/auth/login-dev`, {
+      const response = await axios.post(`${API}/auth/login`, {
         cnpj: cleanCnpj,
         password
       });
