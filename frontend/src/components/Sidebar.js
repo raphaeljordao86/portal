@@ -53,11 +53,11 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-3 flex-1">
+            <div className="flex flex-col items-start space-y-2 flex-1">
               <img 
                 src="https://customer-assets.emergentagent.com/job_fuelcontrol-dash/artifacts/1q79ov19_logo%20montecarlo.PNG" 
                 alt="Monte Carlo"
-                className="w-32 h-20 object-contain"
+                className="w-40 h-24 object-contain"
               />
               <div>
                 <p className="text-xs text-gray-500">Portal do Cliente</p>
