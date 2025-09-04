@@ -266,7 +266,7 @@ async def get_limits(current_user: dict = Depends(get_current_user)):
     limits = await db.limits.find({"client_id": current_user["id"], "is_active": True}).to_list(None)
     return [Limit(**limit) for limit in limits]
 
-@api_router.post("/limits", response_model=Limit)
+@api_router.post("/limits", response_model=Limit, status_code=201)
 async def create_limit(limit_data: LimitCreate, current_user: dict = Depends(get_current_user)):
     limit_dict = limit_data.dict()
     limit_dict["client_id"] = current_user["id"]
