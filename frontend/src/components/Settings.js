@@ -115,59 +115,6 @@ const Settings = () => {
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Credit Information */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-green-600" />
-                Informações de Crédito
-              </CardTitle>
-              <CardDescription>
-                Acompanhe seu limite de crédito e utilização atual
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-blue-600">Limite de Crédito</p>
-                  <p className="text-2xl font-bold text-blue-900">{formatCurrency(settings.credit_limit)}</p>
-                </div>
-                <div className={`p-4 rounded-lg ${usagePercentage >= 90 ? 'bg-red-50' : usagePercentage >= 70 ? 'bg-yellow-50' : 'bg-green-50'}`}>
-                  <p className={`text-sm font-medium ${usagePercentage >= 90 ? 'text-red-600' : usagePercentage >= 70 ? 'text-yellow-600' : 'text-green-600'}`}>
-                    Utilizado ({usagePercentage.toFixed(1)}%)
-                  </p>
-                  <p className={`text-2xl font-bold ${usagePercentage >= 90 ? 'text-red-900' : usagePercentage >= 70 ? 'text-yellow-900' : 'text-green-900'}`}>
-                    {formatCurrency(settings.current_credit_usage)}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-gray-600">Disponível</p>
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(availableCredit)}</p>
-                </div>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="mt-4">
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Utilização do Crédito</span>
-                  <span>{usagePercentage.toFixed(1)}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
-                    className={`h-3 rounded-full transition-all duration-300 ${
-                      usagePercentage >= 100 ? 'bg-red-500' :
-                      usagePercentage >= 90 ? 'bg-red-400' :
-                      usagePercentage >= 80 ? 'bg-yellow-400' :
-                      usagePercentage >= 70 ? 'bg-yellow-300' :
-                      'bg-green-400'
-                    }`}
-                    style={{ width: `${Math.min(usagePercentage, 100)}%` }}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Email Notifications */}
           <Card>
             <CardHeader>
