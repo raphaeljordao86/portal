@@ -40,6 +40,17 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "your-secret-key-change-in-production"
 ALGORITHM = "HS256"
 
+# Email configuration
+SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS', '')
+EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD', '')
+
+# Z-API WhatsApp configuration
+ZAPI_TOKEN = os.environ.get('ZAPI_TOKEN', '')
+ZAPI_INSTANCE_ID = os.environ.get('ZAPI_INSTANCE_ID', '')
+ZAPI_BASE_URL = os.environ.get('ZAPI_BASE_URL', '')
+
 # Utility functions
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
