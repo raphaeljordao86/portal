@@ -26,9 +26,7 @@ const Settings = () => {
     notification_email: '',
     notification_whatsapp: '',
     email_notifications: true,
-    whatsapp_notifications: true,
-    credit_limit: 0,
-    current_credit_usage: 0
+    whatsapp_notifications: true
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
