@@ -306,8 +306,80 @@ class Invoice(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # Authentication Routes
+@api_router.post("/auth/request-2fa")
+async def request_two_factor(request_data: TwoFactorRequest):
+    """Request 2FA code via WhatsApp or Email"""
+    cnpj = re.sub(r'[^0-9]', '', request_data.cnpj)
+    client = await db.clients.find_one({"cnpj": cnpj})
+    
+    if not client or not verify_password(request_data.password, client["password_hash"]):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid CNPJ or password"
+        )
+    
+    if not client["is_active"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account is deactivated"
+        )
+    
+    # Generate verification code
+    code = generate_verification_code()
+    
+    # Send code based on method
+    success = False
+    if request_data.method == "email":
+        success = await send_email_code(client["email"], code)
+    elif request_data.method == "whatsapp":
+        phone = client.get("whatsapp") or client.get("phone")
+        if phone:
+            success = await send_whatsapp_code(phone, code)
+        else:
+            raise HTTPException(status_code=400, detail="WhatsApp number not configured")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid method. Use 'email' or 'whatsapp'")
+    
+    if success:
+        await store_verification_code(cnpj, code, request_data.method)
+        return {
+            "message": f"Verification code sent via {request_data.method}",
+            "method": request_data.method
+        }
+    else:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to send verification code via {request_data.method}"
+        )
+
+@api_router.post("/auth/verify-2fa")
+async def verify_two_factor(verify_data: TwoFactorVerify):
+    """Verify 2FA code and complete login"""
+    cnpj = re.sub(r'[^0-9]', '', verify_data.cnpj)
+    client = await db.clients.find_one({"cnpj": cnpj})
+    
+    if not client:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Verify the code
+    if not await verify_code(cnpj, verify_data.code):
+        raise HTTPException(status_code=401, detail="Invalid or expired verification code")
+    
+    # Generate JWT token
+    access_token = create_access_token(data={"sub": client["cnpj"]})
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "client": {
+            "cnpj": client["cnpj"],
+            "company_name": client["company_name"],
+            "email": client["email"]
+        }
+    }
+
 @api_router.post("/auth/login")
 async def login(client_data: ClientLogin):
+    """Legacy login endpoint - now requires 2FA"""
     cnpj = re.sub(r'[^0-9]', '', client_data.cnpj)
     client = await db.clients.find_one({"cnpj": cnpj})
     
@@ -323,15 +395,11 @@ async def login(client_data: ClientLogin):
             detail="Account is deactivated"
         )
     
-    access_token = create_access_token(data={"sub": client["cnpj"]})
+    # Return message indicating 2FA is required
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "client": {
-            "cnpj": client["cnpj"],
-            "company_name": client["company_name"],
-            "email": client["email"]
-        }
+        "requires_2fa": True,
+        "message": "Two-factor authentication required",
+        "available_methods": ["email", "whatsapp"] if client.get("whatsapp") else ["email"]
     }
 
 @api_router.post("/auth/change-password")
