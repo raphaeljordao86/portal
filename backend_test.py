@@ -541,8 +541,17 @@ def main():
     tester.test_get_transactions()
     tester.test_get_invoices()
     tester.test_get_open_invoices()
+    tester.test_invoice_details()
 
-    print("\n📋 PHASE 8: Security Features")
+    print("\n📋 PHASE 8: Credit System Testing (NEW FEATURES)")
+    tester.test_credit_status()
+    tester.test_credit_alerts()
+
+    print("\n📋 PHASE 9: Settings Management (NEW FEATURES)")
+    tester.test_settings_get()
+    tester.test_settings_update()
+
+    print("\n📋 PHASE 10: Security Features")
     tester.test_change_password()
 
     # Print final results
