@@ -1052,20 +1052,41 @@ async def get_dashboard_stats_get(current_user: dict = Depends(get_current_user)
 # Test data creation (remove in production)
 @api_router.post("/create-test-data")
 async def create_test_data():
-    # Create test client with credit limit
+    # Create test client with multiple contacts
     test_client = Client(
         cnpj="12345678901234",
         company_name="Transportadora ABC Ltda",
         email="admin@transportadoraabc.com",
-        phone="11999999999",
-        whatsapp="5511999999999",
+        phone="34999402367",
+        contacts=[
+            Contact(
+                type="email",
+                value="admin@transportadoraabc.com",
+                is_primary=True,
+                label="Principal"
+            ),
+            Contact(
+                type="email", 
+                value="financeiro@transportadoraabc.com",
+                is_primary=False,
+                label="Financeiro"
+            ),
+            Contact(
+                type="whatsapp",
+                value="5534999402367",
+                is_primary=True,
+                label="Gerência"
+            ),
+            Contact(
+                type="whatsapp",
+                value="5534988887777",
+                is_primary=False,
+                label="Operacional"
+            )
+        ],
         password_hash=get_password_hash("123456"),
         credit_limit=15000.0,
-        current_credit_usage=0.0,
-        notification_email="admin@transportadoraabc.com",
-        notification_whatsapp="5511999999999",
-        email_notifications=True,
-        whatsapp_notifications=True
+        current_credit_usage=0.0
     )
     
     await db.clients.insert_one(test_client.dict())
