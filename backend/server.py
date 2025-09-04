@@ -81,6 +81,114 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication")
 
+# 2FA Helper Functions
+def generate_verification_code() -> str:
+    """Generate a 6-digit verification code"""
+    return str(random.randint(100000, 999999))
+
+async def send_email_code(email: str, code: str) -> bool:
+    """Send verification code via email"""
+    try:
+        if not EMAIL_ADDRESS or not EMAIL_PASSWORD:
+            logger.warning("Email credentials not configured")
+            return False
+            
+        message = MIMEMultipart("alternative")
+        message["Subject"] = "Código de Verificação - Portal do Cliente"
+        message["From"] = EMAIL_ADDRESS
+        message["To"] = email
+
+        html_content = f"""
+        <html>
+          <body>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #2563eb;">Portal do Cliente - Código de Verificação</h2>
+              <p>Seu código de verificação é:</p>
+              <div style="background-color: #f3f4f6; padding: 20px; text-align: center; margin: 20px 0;">
+                <h1 style="color: #1f2937; font-size: 32px; margin: 0;">{code}</h1>
+              </div>
+              <p>Este código expira em 5 minutos.</p>
+              <p style="color: #6b7280; font-size: 12px;">Se você não solicitou este código, ignore este email.</p>
+            </div>
+          </body>
+        </html>
+        """
+        
+        part = MIMEText(html_content, "html")
+        message.attach(part)
+
+        await aiosmtplib.send(
+            message,
+            hostname=SMTP_SERVER,
+            port=SMTP_PORT,
+            start_tls=True,
+            username=EMAIL_ADDRESS,
+            password=EMAIL_PASSWORD,
+        )
+        return True
+    except Exception as e:
+        logger.error(f"Error sending email: {e}")
+        return False
+
+async def send_whatsapp_code(phone: str, code: str) -> bool:
+    """Send verification code via WhatsApp using Z-API"""
+    try:
+        if not ZAPI_TOKEN or not ZAPI_INSTANCE_ID:
+            logger.warning("Z-API credentials not configured")
+            return False
+            
+        # Format phone number (remove non-digits and ensure it starts with country code)
+        clean_phone = re.sub(r'[^0-9]', '', phone)
+        if not clean_phone.startswith('55'):
+            clean_phone = '55' + clean_phone  # Add Brazil country code if not present
+            
+        url = f"https://api.z-api.io/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_TOKEN}/send-messages"
+        
+        payload = {
+            "phone": clean_phone,
+            "message": f"🔐 *Portal do Cliente*\n\nSeu código de verificação é: *{code}*\n\n⏰ Este código expira em 5 minutos.\n\nSe você não solicitou este código, ignore esta mensagem."
+        }
+
+        response = requests.post(url, json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            return True
+        else:
+            logger.error(f"WhatsApp API error: {response.status_code} - {response.text}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Error sending WhatsApp message: {e}")
+        return False
+
+async def store_verification_code(cnpj: str, code: str, method: str):
+    """Store verification code in database with expiration"""
+    await db.verification_codes.delete_many({"cnpj": cnpj})  # Remove old codes
+    
+    verification_data = {
+        "cnpj": cnpj,
+        "code": code,
+        "method": method,
+        "created_at": datetime.now(timezone.utc),
+        "expires_at": datetime.now(timezone.utc) + timedelta(minutes=5)
+    }
+    
+    await db.verification_codes.insert_one(verification_data)
+
+async def verify_code(cnpj: str, code: str) -> bool:
+    """Verify the provided code against stored code"""
+    stored_code = await db.verification_codes.find_one({
+        "cnpj": cnpj,
+        "code": code,
+        "expires_at": {"$gt": datetime.now(timezone.utc)}
+    })
+    
+    if stored_code:
+        # Remove used code
+        await db.verification_codes.delete_one({"_id": stored_code["_id"]})
+        return True
+    return False
+
 # Pydantic Models
 class Client(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
