@@ -205,7 +205,7 @@ const Limits = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <Target className="w-5 h-5 text-blue-600" />
+                      <Calendar className="w-5 h-5 text-blue-600" />
                       {getLimitTypeLabel(limit.limit_type)}
                     </CardTitle>
                     <Badge 
